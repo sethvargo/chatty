@@ -1,14 +1,24 @@
 package main
 
 import (
+	"flag"
 	"log"
 	"os"
 	"os/signal"
 	"syscall"
 )
 
+var (
+	redisAddrPtr = flag.String("redis", "0.0.0.0:6379", "address and port to redis")
+)
+
 func main() {
-	server, err := NewServer()
+	flag.Parse()
+
+	server, err := NewServer(&NewServerOpts{
+		Redis: *redisAddrPtr,
+	})
+
 	if err != nil {
 		log.Printf("[ERR] error starting server: %s", err)
 		os.Exit(127)

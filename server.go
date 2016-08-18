@@ -40,9 +40,13 @@ type Server struct {
 	stopCh chan struct{}
 }
 
-func NewServer() (*Server, error) {
+type NewServerOpts struct {
+	Redis string
+}
+
+func NewServer(i *NewServerOpts) (*Server, error) {
 	client := redis.NewClient(&redis.Options{
-		Addr: ":6379",
+		Addr: i.Redis,
 	})
 
 	// Verify connection
