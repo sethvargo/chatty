@@ -1,0 +1,73 @@
+{
+	"comment": "",
+	"ignore": "test",
+	"package": [
+		{
+			"checksumSHA1": "+uojpoifditV+IIYhEiahrSOM5M=",
+			"path": "github.com/Pallinder/sillyname-go",
+			"revision": "97aeae9e6ba11ec62a40cf8b6b4bc42116c0a303",
+			"revisionTime": "2013-07-30T14:29:14Z"
+		},
+		{
+			"checksumSHA1": "TvxOXFbIpoSY1qCImQ1D4EREVyM=",
+			"path": "github.com/tylerb/graceful",
+			"revision": "842f31108f8d3512ce3176d00bf1a32db1d5e3af",
+			"revisionTime": "2016-08-15T06:12:21Z"
+		},
+		{
+			"checksumSHA1": "likOl7O0BJntqagR050kkOBuY4o=",
+			"path": "golang.org/x/net/websocket",
+			"revision": "07b51741c1d6423d4a6abab1c49940ec09cb1aaf",
+			"revisionTime": "2016-08-11T10:50:59Z"
+		},
+		{
+			"checksumSHA1": "+4r0PnLwwyhO5/jvU5R/TEJb4kA=",
+			"path": "gopkg.in/bsm/ratelimit.v1",
+			"revision": "db14e161995a5177acef654cb0dd785e8ee8bc22",
+			"revisionTime": "2016-02-20T15:49:07Z"
+		},
+		{
+			"checksumSHA1": "3iW6GC7CCeAwb6IqVp0esdYvIbk=",
+			"path": "gopkg.in/redis.v4",
+			"revision": "909c26e76cb93c5fc81469418ab6d05e7725ba53",
+			"revisionTime": "2016-08-17T09:43:40Z"
+		},
+		{
+			"checksumSHA1": "4HbfnrL1KOz/6nsdBAPeL0oUXzc=",
+			"path": "gopkg.in/redis.v4/internal",
+			"revision": "909c26e76cb93c5fc81469418ab6d05e7725ba53",
+			"revisionTime": "2016-08-17T09:43:40Z"
+		},
+		{
+			"checksumSHA1": "l+1jiOGUyjHP0u0mB+KiT/UHVcY=",
+			"path": "gopkg.in/redis.v4/internal/consistenthash",
+			"revision": "909c26e76cb93c5fc81469418ab6d05e7725ba53",
+			"revisionTime": "2016-08-17T09:43:40Z"
+		},
+		{
+			"checksumSHA1": "2g6I7ogdqKeDLwDO+mHn75XSajI=",
+			"path": "gopkg.in/redis.v4/internal/errors",
+			"revision": "909c26e76cb93c5fc81469418ab6d05e7725ba53",
+			"revisionTime": "2016-08-17T09:43:40Z"
+		},
+		{
+			"checksumSHA1": "6XSNzBg5bzd2TjEfC/q41tPT/Zg=",
+			"path": "gopkg.in/redis.v4/internal/hashtag",
+			"revision": "909c26e76cb93c5fc81469418ab6d05e7725ba53",
+			"revisionTime": "2016-08-17T09:43:40Z"
+		},
+		{
+			"checksumSHA1": "iNTNDlfYLkwrmZzLMG+O3PBHSCw=",
+			"path": "gopkg.in/redis.v4/internal/pool",
+			"revision": "909c26e76cb93c5fc81469418ab6d05e7725ba53",
+			"revisionTime": "2016-08-17T09:43:40Z"
+		},
+		{
+			"checksumSHA1": "BGzuM8ZpMCmTKWnb/3CtrV4OwDU=",
+			"path": "gopkg.in/redis.v4/internal/proto",
+			"revision": "909c26e76cb93c5fc81469418ab6d05e7725ba53",
+			"revisionTime": "2016-08-17T09:43:40Z"
+		}
+	],
+	"rootPath": "github.com/sethvargo/chatty"
+}
