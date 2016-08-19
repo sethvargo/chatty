@@ -41,19 +41,14 @@ type Server struct {
 }
 
 type NewServerOpts struct {
-	Redis string
+	Listen string
+	Redis  string
 }
 
 func NewServer(i *NewServerOpts) (*Server, error) {
 	client := redis.NewClient(&redis.Options{
 		Addr: i.Redis,
 	})
-
-	// Verify connection
-	_, err := client.Ping().Result()
-	if err != nil {
-		return nil, fmt.Errorf("failed to connect to redis: %s", err)
-	}
 
 	server := &Server{
 		redis:   client,
@@ -77,7 +72,7 @@ func NewServer(i *NewServerOpts) (*Server, error) {
 	server.httpServer = &graceful.Server{
 		Timeout: 5 * time.Second,
 		Server: &http.Server{
-			Addr:    ":8080",
+			Addr:    i.Listen,
 			Handler: mux,
 		},
 	}
@@ -103,7 +98,12 @@ func (s *Server) wsHandler(ws *websocket.Conn) {
 	for {
 		var contents []byte
 		err := websocket.Message.Receive(ws, &contents)
-		if err != nil && err != io.EOF {
+		if err != nil {
+			if err == io.EOF {
+				log.Printf("[DEBUG] Connection closed for %s", username)
+				return
+			}
+
 			log.Printf("[ERR] ws error: %s", err)
 			break
 		}
@@ -124,29 +124,47 @@ func (s *Server) wsHandler(ws *websocket.Conn) {
 }
 
 func (s *Server) Start() error {
+	// Verify redis connection
+	log.Printf("[DEBUG] Verifying redis connection...")
+	if _, err := s.redis.Ping().Result(); err != nil {
+		return fmt.Errorf("failed to connect to redis: %s", err)
+	}
+
+	// Channel for background errors
+	errCh := make(chan error)
+
 	// Start the server
 	go func() {
+		log.Printf("[INFO] Starting server...")
 		if err := s.httpServer.ListenAndServe(); err != nil {
-			log.Printf("[ERR] server: %s", err)
+			select {
+			case errCh <- fmt.Errorf("server: %s", err):
+			case <-s.stopCh:
+			}
 		}
 	}()
 
 	// Start the pub-sub
+	log.Printf("[DEBUG] Starting pubsub...")
 	pubsub, err := s.redis.Subscribe(channelName)
 	if err != nil {
 		return fmt.Errorf("error subscribing: %s", err)
 	}
 
-	errCh := make(chan error)
 	msgCh := make(chan *redis.Message, 1)
 	go func() {
 		for {
 			m, err := pubsub.ReceiveMessage()
 			if err != nil {
 				log.Printf("[ERR] pubsub receive: %s", err)
-				errCh <- err
+				select {
+				case errCh <- err:
+				case <-s.stopCh:
+				}
 				return
 			}
+
+			log.Printf("[DEBUG] Received message: %s", m.Payload)
 
 			select {
 			case msgCh <- m:
@@ -159,6 +177,7 @@ func (s *Server) Start() error {
 	for {
 		select {
 		case m := <-msgCh:
+			log.Printf("[DEBUG] Pulling message: %s", m.Payload)
 			func() {
 				s.clientsLock.RLock()
 				defer s.clientsLock.RUnlock()
@@ -190,6 +209,8 @@ type JoinOpts struct {
 }
 
 func (s *Server) Join(i *JoinOpts) {
+	log.Printf("[INFO] Joining %q", i.Username)
+
 	s.clientsLock.Lock()
 	defer s.clientsLock.Unlock()
 
@@ -206,6 +227,8 @@ type LeaveOpts struct {
 }
 
 func (s *Server) Leave(i *LeaveOpts) {
+	log.Printf("[INFO] Leaving %q", i.Username)
+
 	s.clientsLock.Lock()
 	defer s.clientsLock.Unlock()
 
@@ -216,17 +239,21 @@ func (s *Server) Leave(i *LeaveOpts) {
 			Type:    typeAnnounce,
 			Message: fmt.Sprintf("%s left!", i.Username),
 		})
+	} else {
+		log.Printf("[WARN] No connection for %q", i.Username)
 	}
 }
 
 type PublishOpts struct {
-	Type     string `json:"type"`
-	Username string `json:"username"`
-	MD5      string `json:"md5"`
-	Message  string `json:"message"`
+	Type     string `json:"type,omitempty"`
+	Username string `json:"username,omitempty"`
+	MD5      string `json:"md5,omitempty"`
+	Message  string `json:"message,omitempty"`
 }
 
 func (s *Server) Publish(i *PublishOpts) error {
+	log.Printf("[INFO] Publishing message %v", i)
+
 	c, err := json.Marshal(i)
 	if err != nil {
 		return err

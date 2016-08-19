@@ -9,14 +9,16 @@ import (
 )
 
 var (
-	redisAddrPtr = flag.String("redis", "0.0.0.0:6379", "address and port to redis")
+	listenPtr    = flag.String("listen", ":8080", "address and port to listen")
+	redisAddrPtr = flag.String("redis", ":6379", "address and port to redis")
 )
 
 func main() {
 	flag.Parse()
 
 	server, err := NewServer(&NewServerOpts{
-		Redis: *redisAddrPtr,
+		Listen: *listenPtr,
+		Redis:  *redisAddrPtr,
 	})
 
 	if err != nil {
