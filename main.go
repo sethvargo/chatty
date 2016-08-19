@@ -40,6 +40,7 @@ func main() {
 		select {
 		case err := <-errCh:
 			log.Printf("[ERR] %s", err)
+			os.Exit(1)
 		case s := <-signalCh:
 			switch s {
 			case syscall.SIGINT:

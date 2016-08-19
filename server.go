@@ -123,11 +123,26 @@ func (s *Server) wsHandler(ws *websocket.Conn) {
 	}
 }
 
+func (s *Server) verifyRedis() error {
+	var err error
+
+	for i := 0; i < 5; i++ {
+		time.Sleep(time.Duration(i) * 2 * time.Second)
+
+		_, err = s.redis.Ping().Result()
+		if err != nil {
+			log.Printf("[ERR] Failed to connect to redis (%d): %s", i+1, err)
+		}
+	}
+
+	return err
+}
+
 func (s *Server) Start() error {
 	// Verify redis connection
 	log.Printf("[DEBUG] Verifying redis connection...")
-	if _, err := s.redis.Ping().Result(); err != nil {
-		return fmt.Errorf("failed to connect to redis: %s", err)
+	if err := s.verifyRedis(); err != nil {
+		return fmt.Errorf("failed to connec to redis: %s", err)
 	}
 
 	// Channel for background errors

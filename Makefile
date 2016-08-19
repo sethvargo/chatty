@@ -1,4 +1,4 @@
-VERSION="0.1.2"
+VERSION="0.1.3"
 EXTERNAL_TOOLS=\
 	github.com/mitchellh/gox
 
