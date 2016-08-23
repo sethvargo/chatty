@@ -57,16 +57,8 @@ func NewServer(i *NewServerOpts) (*Server, error) {
 	}
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		c, err := Asset("public/index.html")
-		if err != nil {
-			panic(err)
-		}
-		w.Write(c)
-	})
-	mux.HandleFunc("/_healthz", func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(200)
-	})
+	mux.HandleFunc("/", server.chatHandler)
+	mux.HandleFunc("/_healthz", server.healthHandler)
 	mux.Handle("/ws", websocket.Handler(server.wsHandler))
 
 	server.httpServer = &graceful.Server{
@@ -78,6 +70,20 @@ func NewServer(i *NewServerOpts) (*Server, error) {
 	}
 
 	return server, nil
+}
+
+func (s *Server) chatHandler(w http.ResponseWriter, r *http.Request) {
+	c, err := Asset("public/index.html")
+	if err != nil {
+		panic(err)
+	}
+	w.Header().Set("Content-Type", "text/html")
+	w.Write(c)
+}
+
+func (s *Server) healthHandler(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("OK"))
 }
 
 func (s *Server) wsHandler(ws *websocket.Conn) {
@@ -109,6 +115,9 @@ func (s *Server) wsHandler(ws *websocket.Conn) {
 		}
 
 		trim := strings.TrimSpace(string(contents))
+
+		// Ignore empty string - this could be a keep-alive message or just an
+		// empty message, in which case we don't want to send that back down.
 		if trim == "" {
 			time.Sleep(250 * time.Millisecond)
 			continue
@@ -132,6 +141,8 @@ func (s *Server) verifyRedis() error {
 		_, err = s.redis.Ping().Result()
 		if err != nil {
 			log.Printf("[ERR] Failed to connect to redis (%d): %s", i+1, err)
+		} else {
+			return nil
 		}
 	}
 
@@ -150,7 +161,7 @@ func (s *Server) Start() error {
 
 	// Start the server
 	go func() {
-		log.Printf("[INFO] Starting server...")
+		log.Printf("[INFO] Starting server on %s...", s.httpServer.Server.Addr)
 		if err := s.httpServer.ListenAndServe(); err != nil {
 			select {
 			case errCh <- fmt.Errorf("server: %s", err):
@@ -267,12 +278,12 @@ type PublishOpts struct {
 }
 
 func (s *Server) Publish(i *PublishOpts) error {
-	log.Printf("[INFO] Publishing message %v", i)
-
 	c, err := json.Marshal(i)
 	if err != nil {
 		return err
 	}
+
+	log.Printf("[INFO] Publishing message %s", c)
 
 	_, err = s.redis.Publish(channelName, string(c)).Result()
 	if err != nil {
