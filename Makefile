@@ -1,6 +1,7 @@
 VERSION="0.1.4"
 EXTERNAL_TOOLS=\
-	github.com/mitchellh/gox
+	github.com/mitchellh/gox \
+	github.com/jteeuwen/go-bindata/...
 
 default: test
 
@@ -32,7 +33,7 @@ generate:
 bootstrap:
 	@echo "==> Bootstrapping..."
 	@for t in ${EXTERNAL_TOOLS}; do \
-		echo "--> Installing "$$t"..." ; \
+		echo "--> Installing "$$t"" ; \
 		go get -u "$$t"; \
 	done
 
