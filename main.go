@@ -13,6 +13,7 @@ var (
 	redisAddrPtr = flag.String("redis", ":6379", "address and port to redis")
 )
 
+//go:generate go-bindata public/...
 func main() {
 	flag.Parse()
 
