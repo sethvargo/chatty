@@ -42,6 +42,7 @@ gox \
   -os="${XC_OS}" \
   -arch="${XC_ARCH}" \
   -osarch="${XC_EXCLUDE}" \
+  -rebuild \
   -ldflags "-X main.GitCommit=${GIT_COMMIT}${GIT_DIRTY}" \
   -output "pkg/{{.OS}}_{{.Arch}}/${NAME}" \
   .

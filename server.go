@@ -153,7 +153,7 @@ func (s *Server) Start() error {
 	// Verify redis connection
 	log.Printf("[DEBUG] Verifying redis connection...")
 	if err := s.verifyRedis(); err != nil {
-		return fmt.Errorf("failed to connec to redis: %s", err)
+		return fmt.Errorf("failed to connect to redis: %s", err)
 	}
 
 	// Channel for background errors

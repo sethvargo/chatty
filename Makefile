@@ -9,6 +9,13 @@ default: test
 bin: generate
 	@sh -c "'${CURDIR}/scripts/build.sh'"
 
+container: generate
+	@echo "==> Building container..."
+	@docker build \
+		-f="docker/build.Dockerfile" \
+		-t="sethvargo/chatty" \
+		$(shell pwd)
+
 # dev creates binares for testing locally - they are put into ./bin and $GOPATH.
 dev: generate
 	@DEV=1 sh -c "'${CURDIR}/scripts/build.sh'"
